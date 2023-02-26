@@ -17,6 +17,7 @@
         $last_name = stripcslashes(strip_tags($Data['last_name']));
         $email = stripcslashes(strip_tags($Data['email']));
         $password = htmlspecialchars($Data['password']);
+        $user_type = htmlspecialchars($Data['user_type']);
         //Just In Case....
         $Errors = [];
 
@@ -38,6 +39,11 @@
             $Errors['password'] = "Sorry, Use a stronger password";
         }
 
+        if(empty($_POST['user_type'])) {
+            $Errors['user_type'] = "Please select a user type.";
+        }
+
+
         if (count($Errors) > 0) {           
             $Errors['error'] = "Please, correct the Errors in your form in order to continue.";
             return $Errors;
@@ -47,7 +53,8 @@
                 'first_name' => $first_name,
                 'last_name' => $last_name,
                 'email' => $email,
-                'password' => $password
+                'password' => $password,
+                'user_type' => $user_type
             ];
             $registration = Register($Data);
             
@@ -101,7 +108,7 @@
     function Register(array $data)
     {
         $dbHandler = DbHandler();
-        $statement = $dbHandler->prepare("INSERT INTO `user` (first_name, last_name, email, password, status, created_at, updated_at) VALUES (:first_name, :last_name, :email, :password, :status, :created_at, :updated_at)");
+        $statement = $dbHandler->prepare("INSERT INTO `user` (first_name, last_name, email, password, status, created_at, updated_at, user_type) VALUES (:first_name, :last_name, :email, :password, :status, :created_at, :updated_at, :user_type)");
         
         //#Defaults....
         $timestamps = date('Y-m-d H:i:s');
@@ -115,6 +122,7 @@
         $statement->bindValue(':status', $status, PDO::PARAM_INT);
         $statement->bindValue(':created_at', $timestamps, PDO::PARAM_STR);
         $statement->bindValue(':updated_at', $timestamps, PDO::PARAM_STR);
+        $statement->bindValue(':user_type', $data['user_type'], PDO::PARAM_STR);
         
         $result = $statement->execute();
         if ($result) {

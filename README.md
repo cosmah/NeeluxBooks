@@ -291,4 +291,4 @@
         }
     }
 
-I have also attached the mysql file needed for you to set up this application and have it up and running. Once again, don't forget to read my Blog on [Codelighters](https://codelighters.com/post/how-to-create-a-simple-signup-and-login-system-using-php-and-pdo/read), follow me, and upvote my work. With love, Ilori Stephen A . :metal:
+I have also attached the mysql file needed for you to set up this application and have it up and running.

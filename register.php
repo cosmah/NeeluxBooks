@@ -66,14 +66,33 @@
                                         <small class="alert alert-danger alert-dismissable"><?php echo $Response['password']; ?></small>
                                     <?php endif; ?>
                                 </div>
-                            </div>
+
                             <div class="row">
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-success btn-block">Register</button>
+                                <div class="col-lg-6">
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                        <div class="form-group">
+                                            <label for="user_type">User Type:</label>
+                                            <select class="form-control" id="user_type" name="user_type">
+                                                <option value="">--Select--</option>
+                                                <option value="admin">Admin</option>
+                                                <option value="user">User</option>
+                                            </select>
+                                        </div>
+                                        <?php if (isset($Response['user_type']) && !empty($Response['user_type'])): ?>
+                                        <small class="alert alert-danger alert-dismissable"><?php echo $Response['user_type']; ?></small>
+                                    <?php endif; ?>
                                     </div>
-                                </div>
+
+                                </div>                          
+                                <div class="col-lg-6">
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-success btn-block">Register</button>
+                                        </div>
+                                    </div>
+                                </div>                                    
                             </div>
+
                         </form>
                     </div>
                 </div>
