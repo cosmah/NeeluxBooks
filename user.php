@@ -18,9 +18,10 @@
                     <p class="mb-4">Dashboard</p>
                     <hr>
                     <p>Welcome back <?php echo $_SESSION['current_session']['user']['last_name'] . ' ' . $_SESSION['current_session']['user']['first_name']; ?></p>
-                    <span>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Illum quia rem quisquam, nulla quibusdam voluptatibus commodi? Omnis quia quo eligendi odio modi accusantium nihil, commodi laudantium adipisci ex pariatur minus explicabo, ipsum consequatur fugit magni inventore obcaecati nesciunt recusandae quibusdam?</span>
+                    <span>To make sure that that I don’t get distracted by server-level issues, I decided to host my application on the Cloudways PHP hosting platform because I get a highly optimized hosting stack and no server management hassles. You can try out Cloudways for free by signing for an account.</span>
+                                   <a href="logout.php">LOGOUT</a>
+                    <p>this is the norml user user page</p>
                 </div>
-                <a href="logout.php">LOGOUT</a>
             </div>
         </div>
     </div>

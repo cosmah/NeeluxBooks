@@ -1,5 +1,6 @@
 <?php
-  require_once('./functions/Db.php');
+require_once(__DIR__ . '/../functions/Db.php');
+;
   
   /**
    * @param Array $data
@@ -22,13 +23,24 @@
     } else {
       //we check that the password matches the hash
       if (password_verify($Password, $Email_check['data']['password'])) {
+         // If the user is an admin, redirect to dashboard.php
+      if ($Email_check['data']['user_type'] == 'admin') {
         $_SESSION['current_session'] = [
           'status' => 1,
           'user' => $Email_check['data'],
           'date_time' => date('Y-m-d H:i:s'),
         ];
         header("Location: dashboard.php");
+        } else {
+        // If the user is not an admin, redirect to user.php
+        $_SESSION['current_session'] = [
+          'status' => 1,
+          'user' => $Email_check['data'],
+          'date_time' => date('Y-m-d H:i:s'),
+        ];
+        header("Location: user.php");
       }
+    }
 
       if (!password_verify($Password, $Email_check['data']['password'])) {
         $Errors['error'] = "Invalid credentials passed. Please, check the Email or Password and try again.";
@@ -46,7 +58,7 @@
   function checkEmail(string $email) : array
   {
     $dbHandler = DbHandler();
-    $statement = $dbHandler->prepare("SELECT `first_name`, `last_name`, `email`, `password` FROM `user` WHERE `email` = :email");
+    $statement = $dbHandler->prepare("SELECT `first_name`, `last_name`, `email`, `password`, `user_type` FROM `user` WHERE `email` = :email");
     $statement->bindValue(':email', $email, PDO::PARAM_STR);
     $statement->execute();
     $result = $statement->fetch(PDO::FETCH_ASSOC);

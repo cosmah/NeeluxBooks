@@ -66,7 +66,7 @@
                     'user' => $Data,
                     'date_time' => date('Y-m-d H:i:s'),
                 ];
-                header("Location: dashboard.php");
+                header("Location: login.php");
             } else {
                 //#You could probably notify the dev team within this line but this is just a demo still....
                 $Errors['error'] = "Sorry an unexpected error and your account could not be created. Please try again later.";
