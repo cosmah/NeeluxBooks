@@ -69,6 +69,10 @@ ALTER TABLE `user`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+--
+--USER-TYPE for table `user`
+--
+ALTER TABLE users ADD COLUMN user_type VARCHAR(255);
 
 --
 -- AUTO_INCREMENT for table `user`
