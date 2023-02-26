@@ -1,66 +1,294 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Login And Signup System Using **PHP AND PDO (PROCEDURAL)**
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Folder Structure
 
-## About Laravel
+ The following files acts as our view files and they all exist in our project root directory.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+ * login.php
+ * dashboard.php
+ * register.php
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+ These files contains the html structure (Form Included) for achieving this simple process. At the very top of these files are some php logic which handles some simple operations when a form is submitted.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+ There is also a **functions folder** in our project directory which contains all the Business logic needed to make our forms work. In our functions folder, we have the following;
 
-## Learning Laravel
+ 1. **DB.PHP**
+    This file houses a function which is responsible for creating a __DB Connection__ which infact is a **PDO Instance** or a **PDO Object** which we can then now use within our application in performing **CRUD (Create, Read, Update Delete)** operations.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+    ```php
+            session_start();
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+            /**
+             * @param void | null
+             * @return array | mixed
+             * @desc THis function creates a new PDO connection and returns the       handler.
+            **/
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+            function DbHandler ()
+            {
+                $dbHost = 'localhost';
+                $dbName = 'YOUR_DATABASE_NAME';
+                $dbUser = 'YOUR_MYSQL_USERNAME';
+                $dbPass = 'YOUR_MYSQL_PASSWORD';
+                //Create a DSN for the database resource...
+                $Dsn = "mysql:host=" . $dbHost . ";dbname=" . $dbName;
+                //Create an options configuration for the PDO connection...
+                $options = array(
+                    PDO::ATTR_PERSISTENT => true,
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+                );
 
-## Laravel Sponsors
+                try {
+                    $Connection = new PDO($Dsn, $dbUser, $dbPass, $options);
+                    return $Connection;
+                } catch (Exception $e) {
+                    return 'Couldn\'t Establish A Database Connection. Due to the following reason: ' . $e->getMessage();
+                }
+            }
+    ```
+2. **LOGIN.PHP**
+    This file makes use of our __DB.PHP__ file which makes the **DBHandler function** available to us which we can then now make use of in communicating with our **MYSQL DATABASE** in order to verify the users __Email Address__ and __Password__. 
+    The file has two functions,
+    
+    1. **Login** 
+        This is where our business logic for authenticating a user is written. The function returns an **Array** if the user fails validation and performs a redirect when the user passes validation. 
+        
+        The __Superglobals $_POST__ is filtered and the values from the associative array is stripped off of any html special characters as this helps in preventing __Sql Injection__. After this, we check if the Email exists by calling the **checkEmail function** with the user's Email address as it's arguement which then returns an **Errors Array** if the Email address is not found but returns an Array containing the Users Information if the user exists. 
+        
+        The __password, an (hash)__ from the returned Array is then matched against the users typed in password using php's **password_verify** function. which returns a Boolean if the given password matches the hash. You can find more information on the [php.net website](https://www.php.net/password_verify) on using the __password_verify function__. 
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+        The boolean returned from the function __password_verify__ is then used in our conditional which sets a user session and redirects our user if true or returns an Errors Array if false.
 
-### Premium Partners
+        ```php
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+                require_once('./functions/Db.php');
+                
+                /**
+                * @param Array $data
+                * @return Array | void
+                * Receives an email address and password from the $_POST superglobal and matches it against the databse records to authenticate the user
+                */
 
-## Contributing
+                function Login(array $data)
+                {
+                    $Data = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+                    $Errors = [];
+                    $Email = stripcslashes(strip_tags($Data['email']));
+                    $Password = htmlspecialchars($Data['password']);
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+                    //check if the email address exists in the database...
+                    $Email_check = checkEmail($Email);
+                    if (!$Email_check['status']) {
+                    $Errors['error'] = "Invalid credentials passed. Please, check the Email or Password and try again.";
+                    return $Errors;
+                    } else {
+                    //we check that the password matches the hash
+                    if (password_verify($Password, $Email_check['data']['password'])) {
+                        $_SESSION['current_session'] = [
+                        'status' => 1,
+                        'user' => $Email_check['data'],
+                        'date_time' => date('Y-m-d H:i:s'),
+                        ];
+                        header("Location: dashboard.php");
+                    }
 
-## Code of Conduct
+                    if (!password_verify($Password, $Email_check['data']['password'])) {
+                        $Errors['error'] = "Invalid credentials passed. Please, check the Email or Password and try again.";
+                        return $Errors;
+                    }
+                    }
+                }
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+                /**
+                    * @param String $email
+                    * @return Array 
+                    * @desc Checks if an email string exists in the database and returns   an array which determines the output of the operation.
+                */
+                
+                function checkEmail(string $email) : array
+                {
+                    $dbHandler = DbHandler();
+                    $statement = $dbHandler->prepare("SELECT `first_name`, `last_name`, `email`, `password` FROM `user` WHERE `email` = :email");
+                    $statement->bindValue(':email', $email, PDO::PARAM_STR);
+                    $statement->execute();
+                    $result = $statement->fetch(PDO::FETCH_ASSOC);
 
-## Security Vulnerabilities
+                    if (empty($result)) {
+                        $response['status'] = false;
+                        $response['data'] = [];
+                        return $response;
+                    }
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+                    $response['status'] = true;
+                    $response['data'] = $result;
+                    return $response;
+                }
+        ```
+    2. **checkEmail**
+        This functions gets the users email address and queries our database by using our **DBHandler Function** using **PDO (PHP DATA OBJECTS)** __prepared statements__ to achieve this which is more secure than passing in the values directly which makes any application vulnerable to __MYSQL INJECTION__.
+        
+        ```php
+                  /**
+                    * @param String $email
+                    * @return Array 
+                    * @desc Checks if an email string exists in the database and returns   an array which determines the output of the operation.
+                */
+                
+                function checkEmail(string $email) : array
+                {
+                    $dbHandler = DbHandler();
+                    $statement = $dbHandler->prepare("SELECT `first_name`, `last_name`, `email`, `password` FROM `user` WHERE `email` = :email");
+                    $statement->bindValue(':email', $email, PDO::PARAM_STR);
+                    $statement->execute();
+                    $result = $statement->fetch(PDO::FETCH_ASSOC);
 
-## License
+                    if (empty($result)) {
+                        $response['status'] = false;
+                        $response['data'] = [];
+                        return $response;
+                    }
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+                    $response['status'] = true;
+                    $response['data'] = $result;
+                    return $response;
+                }
+        ```
+3. **SIGNUP.PHP**
+    This file also makes use of our **DBHandler function** in communicating with our **MYSQL DATABASE** to perform **CRUD (Create, Read, Update Delete)** operations. The file also houses 3 functions which helps us with the process of creating a new user. 
+    
+    In our **SIGNUP.PHP** we have the __Signup function__ which handles our Business logic for creating a new user. The __Signup function__ accepts an Array as it's arguement and returns an Errors array if a condition is not satisfied else it performs an HTTP Redirect. We also filter and strip the values from our __$_POST Superglobals__ which helps us in preventing __Sql Injection__.
+
+    We have some simple conditions such as; 
+    * checking if an email exists
+    * checking if the first name is a string
+    * checking if the last name is a string
+    * verifying that the password is greater than 7 characters.
+
+    When all conditions are satisfied, we call the __register function__ which creates a new user by using our __DBHandler function__, set a new session for the user and perform an HTTP Redirect.
+    ```php
+        
+        require_once('./functions/Db.php');
+
+    /**
+     * @param Array $data
+     * @return Array 
+     * @desc Receives an array conaining our user information in an attempt to create a new user.
+    */
+
+    function Signup(array $data) 
+    {
+        $Data = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+        
+        //Registration Data Filtering....
+        $first_name = stripcslashes(strip_tags($Data['first_name']));
+        $last_name = stripcslashes(strip_tags($Data['last_name']));
+        $email = stripcslashes(strip_tags($Data['email']));
+        $password = htmlspecialchars($Data['password']);
+        //Just In Case....
+        $Errors = [];
+
+        if (preg_match('/[^A-Za-z0-9_]/', $first_name)) {
+            $Errors['first_name'] = "Sorry, Please enter a valid first name";
+        }
+
+        if (preg_match('/[^A-Za-z0-9_]/', $last_name)) {
+            $Errors['last_name'] = "Sorry, Please enter a valid last name";
+        }
+
+        //Check if the email exists...
+        $emailExists = checkEmail($email);
+        if ($emailExists['status']) {
+            $Errors['email'] = "Sorry, This email already exist.";
+        }
+
+        if (strlen($password) < 7) {
+            $Errors['password'] = "Sorry, Use a stronger password";
+        }
+
+        if (count($Errors) > 0) {           
+            $Errors['error'] = "Please, correct the Errors in your form in order to continue.";
+            return $Errors;
+        } else {
+            //Create the new user...
+            $Data = [
+                'first_name' => $first_name,
+                'last_name' => $last_name,
+                'email' => $email,
+                'password' => $password
+            ];
+            $registration = Register($Data);
+            
+            if ($registration) {
+                //Before the redirect this would be a good time to send a mail or something in order to verify the user...
+                array_pop($Data);
+                $_SESSION['current_session'] = [
+                    'status' => 1,
+                    'user' => $Data,
+                    'date_time' => date('Y-m-d H:i:s'),
+                ];
+                header("Location: dashboard.php");
+            } else {
+                //#You could probably notify the dev team within this line but this is just a demo still....
+                $Errors['error'] = "Sorry an unexpected error and your account could not be created. Please try again later.";
+                return $Errors;
+            }
+        }
+    }
+
+    /**
+     * @param String $email
+     * @return Array 
+     * @desc Checks if an email string exists in the database and returns   an array which determines the output of the operation.
+     */
+
+    function checkEmail(string $email) : array
+    {
+        $dbHandler = DbHandler();
+        $statement = $dbHandler->prepare("SELECT * FROM `user` WHERE `email` = :email");
+        $statement->bindValue(':email', $email, PDO::PARAM_STR);
+        $statement->execute();
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+        if (empty($result)) {
+            $response['status'] = false;
+            $response['data'] = [];
+            return $response;
+        }
+
+        $response['status'] = true;
+        $response['data'] = $result;
+        return $response;
+    }
+
+    /**
+     * @param Array $data
+     * @return Array 
+     * @desc Creates a new user and returns a boolean indicating the status of the              operation...
+     */
+    function Register(array $data)
+    {
+        $dbHandler = DbHandler();
+        $statement = $dbHandler->prepare("INSERT INTO `user` (first_name, last_name, email, password, status, created_at, updated_at) VALUES (:first_name, :last_name, :email, :password, :status, :created_at, :updated_at)");
+        
+        //#Defaults....
+        $timestamps = date('Y-m-d H:i:s');
+        $status = 1;
+        $password = password_hash($data['password'], PASSWORD_BCRYPT);
+        //Values Bindings....
+        $statement->bindValue(':first_name', $data['first_name'], PDO::PARAM_STR);
+        $statement->bindValue(':last_name', $data['last_name'], PDO::PARAM_STR);
+        $statement->bindValue(':email', $data['email'], PDO::PARAM_STR);
+        $statement->bindValue(':password', $password, PDO::PARAM_STR);
+        $statement->bindValue(':status', $status, PDO::PARAM_INT);
+        $statement->bindValue(':created_at', $timestamps, PDO::PARAM_STR);
+        $statement->bindValue(':updated_at', $timestamps, PDO::PARAM_STR);
+        
+        $result = $statement->execute();
+        if ($result) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+I have also attached the mysql file needed for you to set up this application and have it up and running. Once again, don't forget to read my Blog on [Codelighters](https://codelighters.com/post/how-to-create-a-simple-signup-and-login-system-using-php-and-pdo/read), follow me, and upvote my work. With love, Ilori Stephen A . :metal:
