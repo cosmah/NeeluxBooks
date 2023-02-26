@@ -15,37 +15,7 @@
  1. **DB.PHP**
     This file houses a function which is responsible for creating a __DB Connection__ which infact is a **PDO Instance** or a **PDO Object** which we can then now use within our application in performing **CRUD (Create, Read, Update Delete)** operations.
 
-    ```php
-            session_start();
-
-            /**
-             * @param void | null
-             * @return array | mixed
-             * @desc THis function creates a new PDO connection and returns the       handler.
-            **/
-
-            function DbHandler ()
-            {
-                $dbHost = 'localhost';
-                $dbName = 'YOUR_DATABASE_NAME';
-                $dbUser = 'YOUR_MYSQL_USERNAME';
-                $dbPass = 'YOUR_MYSQL_PASSWORD';
-                //Create a DSN for the database resource...
-                $Dsn = "mysql:host=" . $dbHost . ";dbname=" . $dbName;
-                //Create an options configuration for the PDO connection...
-                $options = array(
-                    PDO::ATTR_PERSISTENT => true,
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-                );
-
-                try {
-                    $Connection = new PDO($Dsn, $dbUser, $dbPass, $options);
-                    return $Connection;
-                } catch (Exception $e) {
-                    return 'Couldn\'t Establish A Database Connection. Due to the following reason: ' . $e->getMessage();
-                }
-            }
-    ```
+    
 2. **LOGIN.PHP**
     This file makes use of our __DB.PHP__ file which makes the **DBHandler function** available to us which we can then now make use of in communicating with our **MYSQL DATABASE** in order to verify the users __Email Address__ and __Password__. 
     The file has two functions,
@@ -59,100 +29,10 @@
 
         The boolean returned from the function __password_verify__ is then used in our conditional which sets a user session and redirects our user if true or returns an Errors Array if false.
 
-        ```php
-
-                require_once('./functions/Db.php');
-                
-                /**
-                * @param Array $data
-                * @return Array | void
-                * Receives an email address and password from the $_POST superglobal and matches it against the databse records to authenticate the user
-                */
-
-                function Login(array $data)
-                {
-                    $Data = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-                    $Errors = [];
-                    $Email = stripcslashes(strip_tags($Data['email']));
-                    $Password = htmlspecialchars($Data['password']);
-
-                    //check if the email address exists in the database...
-                    $Email_check = checkEmail($Email);
-                    if (!$Email_check['status']) {
-                    $Errors['error'] = "Invalid credentials passed. Please, check the Email or Password and try again.";
-                    return $Errors;
-                    } else {
-                    //we check that the password matches the hash
-                    if (password_verify($Password, $Email_check['data']['password'])) {
-                        $_SESSION['current_session'] = [
-                        'status' => 1,
-                        'user' => $Email_check['data'],
-                        'date_time' => date('Y-m-d H:i:s'),
-                        ];
-                        header("Location: dashboard.php");
-                    }
-
-                    if (!password_verify($Password, $Email_check['data']['password'])) {
-                        $Errors['error'] = "Invalid credentials passed. Please, check the Email or Password and try again.";
-                        return $Errors;
-                    }
-                    }
-                }
-
-                /**
-                    * @param String $email
-                    * @return Array 
-                    * @desc Checks if an email string exists in the database and returns   an array which determines the output of the operation.
-                */
-                
-                function checkEmail(string $email) : array
-                {
-                    $dbHandler = DbHandler();
-                    $statement = $dbHandler->prepare("SELECT `first_name`, `last_name`, `email`, `password` FROM `user` WHERE `email` = :email");
-                    $statement->bindValue(':email', $email, PDO::PARAM_STR);
-                    $statement->execute();
-                    $result = $statement->fetch(PDO::FETCH_ASSOC);
-
-                    if (empty($result)) {
-                        $response['status'] = false;
-                        $response['data'] = [];
-                        return $response;
-                    }
-
-                    $response['status'] = true;
-                    $response['data'] = $result;
-                    return $response;
-                }
-        ```
+ 
     2. **checkEmail**
         This functions gets the users email address and queries our database by using our **DBHandler Function** using **PDO (PHP DATA OBJECTS)** __prepared statements__ to achieve this which is more secure than passing in the values directly which makes any application vulnerable to __MYSQL INJECTION__.
-        
-        ```php
-                  /**
-                    * @param String $email
-                    * @return Array 
-                    * @desc Checks if an email string exists in the database and returns   an array which determines the output of the operation.
-                */
-                
-                function checkEmail(string $email) : array
-                {
-                    $dbHandler = DbHandler();
-                    $statement = $dbHandler->prepare("SELECT `first_name`, `last_name`, `email`, `password` FROM `user` WHERE `email` = :email");
-                    $statement->bindValue(':email', $email, PDO::PARAM_STR);
-                    $statement->execute();
-                    $result = $statement->fetch(PDO::FETCH_ASSOC);
 
-                    if (empty($result)) {
-                        $response['status'] = false;
-                        $response['data'] = [];
-                        return $response;
-                    }
-
-                    $response['status'] = true;
-                    $response['data'] = $result;
-                    return $response;
-                }
-        ```
 3. **SIGNUP.PHP**
     This file also makes use of our **DBHandler function** in communicating with our **MYSQL DATABASE** to perform **CRUD (Create, Read, Update Delete)** operations. The file also houses 3 functions which helps us with the process of creating a new user. 
     
