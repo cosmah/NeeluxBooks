@@ -30,7 +30,7 @@ require_once(__DIR__ . '/../functions/Db.php');
           'user' => $Email_check['data'],
           'date_time' => date('Y-m-d H:i:s'),
         ];
-        header("Location: dashboard.php");
+        header("Location: ./dashboards/dashboard.php");
         } else {
         // If the user is not an admin, redirect to user.php
         $_SESSION['current_session'] = [
@@ -38,7 +38,7 @@ require_once(__DIR__ . '/../functions/Db.php');
           'user' => $Email_check['data'],
           'date_time' => date('Y-m-d H:i:s'),
         ];
-        header("Location: user.php");
+        header("Location: ./dashboards/user.php");
       }
     }
 
